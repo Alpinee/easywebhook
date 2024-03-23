@@ -1,0 +1,99 @@
+{{define "index"}}
+{{template "head.html" .}}
+
+<body>
+<div class="container">
+    <div class="columns is-centered">
+        <div class="column is-half">
+            <h1 class="title has-text-centered">Admin Panel</h1>
+            <form id="scriptForm">
+                <div class="field">
+                    <label class="label">Token</label>
+                    <div class="control">
+                        <input class="input" type="text" id="token" placeholder="Enter token">
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Script</label>
+                    <div class="control">
+                        <textarea class="textarea" id="script" placeholder="Enter script"></textarea>
+                    </div>
+                </div>
+                <div class="field is-grouped is-grouped-centered">
+                    <div class="control">
+                        <button type="submit" class="button is-primary">Add Script</button>
+                    </div>
+                </div>
+            </form>
+            <hr>
+            <h2 class="subtitle has-text-centered">Scripts List</h2>
+            <ul id="scriptList">
+                {{range .list}}
+                <li>
+                    <div class="box is-flex is-justify-content-space-between">
+                        <div>
+                            <span class="tag is-primary text-lg">Token: {{.Token }}</span>
+                            <br>
+                            <span class="tag is-success mt-2">Script: {{.Script }}</span>
+                        </div>
+                        <button class="button is-danger mt-2" onclick="deleteMe({{.ID}})">Delete</button>
+                    </div>
+                </li>
+                {{end}}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('scriptForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+        var token = document.getElementById('token').value;
+        var script = document.getElementById('script').value;
+        fetch('/api/script/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                token: token,
+                script: script
+            })
+        }).then(response => {
+            return response.json()
+        }).then(data => {
+            if (data.error) {
+                alert(data.error)
+                return
+            }
+
+            window.location.reload();
+        }).catch(error => {
+            // 处理错误
+            console.error('There was a problem with the fetch operation:', error);
+        });
+    });
+
+    function deleteMe(id) {
+        if (confirm("Are you confirm to delete this link?")) {
+            fetch('/api/script/delete/' + id, {
+                method: 'DELETE',
+            }).then(response => {
+                return response.json()
+            }).then(data => {
+                if (data.error) {
+                    alert(data.error)
+                    return
+                }
+
+                window.location.reload();
+            }).catch(error => {
+                // 处理错误
+                console.error('There was a problem with the fetch operation:', error);
+            });
+        }
+    }
+</script>
+</body>
+{{template "foot.html" .}}
+{{end}}

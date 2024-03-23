@@ -1,0 +1,65 @@
+{{define "login"}}
+{{template "head.html" .}}
+
+<body>
+<div class="container">
+    <div class="columns is-centered">
+        <div class="column is-half">
+            <h1 class="title has-text-centered">Login</h1>
+            <form id="loginForm">
+                <div class="field">
+                    <label class="label">Account</label>
+                    <div class="control">
+                        <input class="input" type="text" id="account" placeholder="Enter your account">
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Password</label>
+                    <div class="control">
+                        <input class="input" type="password" id="password" placeholder="Enter your password">
+                    </div>
+                </div>
+                <div class="field is-grouped is-grouped-centered">
+                    <div class="control">
+                        <button type="submit" class="button is-primary">Login</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('loginForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+        var account = document.getElementById('account').value;
+        var password = document.getElementById('password').value;
+
+        fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                account: account,
+                password: password
+            })
+        }).then(response => {
+            return response.json()
+        }).then(data => {
+            if (data.error) {
+                alert(data.error)
+                return
+            }
+
+            window.location.href = "/"
+        }).catch(error => {
+            // 处理错误
+            console.error('There was a problem with the fetch operation:', error);
+        });
+    });
+</script>
+</body>
+
+{{template "foot.html" .}}
+{{end}}
