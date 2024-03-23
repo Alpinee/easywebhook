@@ -38,6 +38,7 @@ type TokenScript struct {
 	UserId int    `gorm:"not null" json:"user_id,omitempty"`
 	Token  string `gorm:"unique" json:"token,omitempty"`
 	Script string `json:"script,omitempty"`
+	Dir    string `json:"dir"` // 执行目录
 }
 
 type User struct {

@@ -37,6 +37,7 @@ func InitRouter() {
 		script.GET("/get/:id", getScript)
 		script.PUT("/update/:id", updateScript)
 		script.DELETE("/delete/:id", deleteScript)
+		script.GET("/run/:id", runScript)
 	}
 
 	// 指定监听的端口，例如8888

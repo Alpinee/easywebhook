@@ -172,6 +172,28 @@ func deleteScript(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Script deleted successfully"})
 }
 
+func runScript(c *gin.Context) {
+	var tokenScript domain.TokenScript
+	id := c.Param("id")
+
+	if id == "" {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Script not found"})
+		return
+	}
+
+	if err := domain.Db.First(&tokenScript, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Script not found"})
+		return
+	}
+
+	if err := run(tokenScript); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, nil)
+}
+
 /**
  * 处理webhook
  * @Author gongquanlin
@@ -194,9 +216,7 @@ func handleWebhook(c *gin.Context) {
 		return
 	}
 
-	// 执行获取到的脚本
-	cmd := exec.Command("sh", "-c", tokenScript.Script)
-	err := cmd.Run()
+	err := run(tokenScript)
 
 	// 检查是否执行成功，如果执行失败则返回错误
 	if err != nil {
@@ -206,4 +226,14 @@ func handleWebhook(c *gin.Context) {
 
 	// 返回成功的响应
 	c.JSON(http.StatusOK, gin.H{"message": "Script executed successfully"})
+}
+
+func run(tokenScript domain.TokenScript) error {
+	// 执行获取到的脚本
+	cmd := exec.Command("sh", "-c", tokenScript.Script)
+	// cmd.Stdout = // TODO 记录日志
+	if tokenScript.Dir != "" {
+		cmd.Dir = tokenScript.Dir
+	}
+	return cmd.Run()
 }

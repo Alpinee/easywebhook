@@ -19,6 +19,12 @@
                         <textarea class="textarea" id="script" placeholder="Enter script"></textarea>
                     </div>
                 </div>
+                <div class="field">
+                    <label class="label">Dir</label>
+                    <div class="control">
+                        <textarea class="textarea" id="dir" placeholder="Enter dir"></textarea>
+                    </div>
+                </div>
                 <div class="field is-grouped is-grouped-centered">
                     <div class="control">
                         <button type="submit" class="button is-primary">Add Script</button>
@@ -35,8 +41,13 @@
                             <span class="tag is-primary text-lg">Token: {{.Token }}</span>
                             <br>
                             <span class="tag is-success mt-2">Script: {{.Script }}</span>
+                            <br>
+                            <span class="tag is-info mt-2">Dir: {{.Dir }}</span>
                         </div>
-                        <button class="button is-danger mt-2" onclick="deleteMe({{.ID}})">Delete</button>
+                        <div class="mt-2">
+                            <button class="button is-primary" onclick="runMe({{.ID}})">Run</button>
+                            <button class="button is-danger" onclick="deleteMe({{.ID}})">Delete</button>
+                        </div>
                     </div>
                 </li>
                 {{end}}
@@ -50,6 +61,7 @@
         event.preventDefault();
         var token = document.getElementById('token').value;
         var script = document.getElementById('script').value;
+        var dir = document.getElementById('dir').value;
         fetch('/api/script/add', {
             method: 'POST',
             headers: {
@@ -57,7 +69,8 @@
             },
             body: JSON.stringify({
                 token: token,
-                script: script
+                script: script,
+                dir: dir
             })
         }).then(response => {
             return response.json()
@@ -75,9 +88,29 @@
     });
 
     function deleteMe(id) {
-        if (confirm("Are you confirm to delete this link?")) {
+        if (confirm("Are you confirm to delete this script?")) {
             fetch('/api/script/delete/' + id, {
                 method: 'DELETE',
+            }).then(response => {
+                return response.json()
+            }).then(data => {
+                if (data.error) {
+                    alert(data.error)
+                    return
+                }
+
+                window.location.reload();
+            }).catch(error => {
+                // 处理错误
+                console.error('There was a problem with the fetch operation:', error);
+            });
+        }
+    }
+
+    function runMe(id) {
+        if (confirm("Are you confirm to run this script?")) {
+            fetch('/api/script/run/' + id, {
+                method: 'GET',
             }).then(response => {
                 return response.json()
             }).then(data => {
